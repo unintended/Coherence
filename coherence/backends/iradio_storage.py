@@ -21,7 +21,7 @@ import coherence.extern.louie as louie
 from coherence.extern.simple_plugin import Plugin
 
 from coherence import log
-from coherence.backend import BackendItem, BackendStore, Container, LazyContainer, AbstractBackendStore
+from coherence.backend import BackendItem, BackendStore, Container, LazyContainerWithPaging, AbstractBackendStore
 
 from urlparse import urlsplit
 
@@ -223,7 +223,7 @@ class IRadioStore(AbstractBackendStore):
         else:
             same_genres = [genre]
         title = genre.encode('utf-8')
-        family_item = LazyContainer(parent, title, genre, self.refresh, self.retrieveItemsForGenre, genres=same_genres, per_page=1)
+        family_item = LazyContainerWithPaging(parent, title, genre, self.refresh, self.retrieveItemsForGenre, genres=same_genres, per_page=1)
 
         # we will use a specific child items sorter
         # in order to get the sub-genre containers first

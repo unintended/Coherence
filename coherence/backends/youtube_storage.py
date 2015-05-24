@@ -20,7 +20,7 @@ from coherence import log
 
 from gdata.youtube.service import YouTubeService
 from coherence.extern.youtubedl import FileDownloader, YoutubeIE, MetacafeIE, YoutubePlaylistIE
-from coherence.backends.picasa_storage import Container, LazyContainer, AbstractBackendStore
+from coherence.backends.picasa_storage import Container, LazyContainerWithPaging, AbstractBackendStore
 
 MPEG4_MIMETYPE = 'video/mp4'
 MPEG4_EXTENSION = 'mp4'
@@ -447,9 +447,9 @@ class YouTubeStore(AbstractBackendStore):
             userfeeds_uri = 'http://gdata.youtube.com/feeds/api/users/%s/%s'
             self.appendFeed('My Uploads', userfeeds_uri % (self.login, 'uploads'), rootItem)
             self.appendFeed('My Favorites', userfeeds_uri % (self.login, 'favorites'), rootItem)
-            playlistsItem = LazyContainer(rootItem, 'My Playlists', None, self.refresh, self.retrievePlaylistFeeds)
+            playlistsItem = LazyContainerWithPaging(rootItem, 'My Playlists', None, self.refresh, self.retrievePlaylistFeeds)
             rootItem.add_child(playlistsItem)
-            subscriptionsItem = LazyContainer(rootItem, 'My Subscriptions', None, self.refresh, self.retrieveSubscriptionFeeds)
+            subscriptionsItem = LazyContainerWithPaging(rootItem, 'My Subscriptions', None, self.refresh, self.retrieveSubscriptionFeeds)
             rootItem.add_child(subscriptionsItem)
 
         self.init_completed()
@@ -458,7 +458,7 @@ class YouTubeStore(AbstractBackendStore):
         return self.__class__.__name__
 
     def appendFeed(self, name, feed_uri, parent):
-        item = LazyContainer(parent, name, None, self.refresh, self.retrieveFeedItems, feed_uri=feed_uri)
+        item = LazyContainerWithPaging(parent, name, None, self.refresh, self.retrieveFeedItems, feed_uri=feed_uri)
         parent.add_child(item, external_id=feed_uri)
 
     def appendVideoEntry(self, entry, parent):
@@ -550,7 +550,7 @@ class YouTubeStore(AbstractBackendStore):
                 title = playlist_video_entry.title.text
                 playlist_id = playlist_video_entry.id.text.split("/")[-1]  # FIXME find better way to retrieve the playlist ID
 
-                item = LazyContainer(parent, title, playlist_id, self.refresh, self.retrievePlaylistFeedItems, playlist_id=playlist_id)
+                item = LazyContainerWithPaging(parent, title, playlist_id, self.refresh, self.retrievePlaylistFeedItems, playlist_id=playlist_id)
                 parent.add_child(item, external_id=playlist_id)
 
         def gotError(error):
@@ -572,7 +572,7 @@ class YouTubeStore(AbstractBackendStore):
                 uri = entry.id.text
                 name = "[%s] %s" % (type, title)
 
-                item = LazyContainer(parent, name, uri, self.refresh, self.retrieveSubscriptionFeedItems, uri=uri)
+                item = LazyContainerWithPaging(parent, name, uri, self.refresh, self.retrieveSubscriptionFeedItems, uri=uri)
                 item.parent = parent
                 parent.add_child(item, external_id=uri)
 

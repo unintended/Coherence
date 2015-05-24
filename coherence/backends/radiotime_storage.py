@@ -13,7 +13,7 @@ from twisted.python.failure import Failure
 from coherence.upnp.core import utils
 from coherence.upnp.core import DIDLLite
 from coherence.upnp.core.DIDLLite import Resource
-from coherence.backend import BackendItem, Container, LazyContainer, AbstractBackendStore
+from coherence.backend import BackendItem, Container, LazyContainerWithPaging, AbstractBackendStore
 
 OPML_BROWSE_URL = 'http://opml.radiotime.com/Browse.ashx'
 
@@ -91,7 +91,7 @@ class RadiotimeStore(AbstractBackendStore):
         root_url = "%s?partnerId=%s&%s&formats=%s&locale=%s" % (self.browse_url, self.partner_id, identification_param, formats_value, self.locale)
 
         # set root item
-        root_item = LazyContainer(None, "root", "root", self.refresh, self.retrieveItemsForOPML, url=root_url)
+        root_item = LazyContainerWithPaging(None, "root", "root", self.refresh, self.retrieveItemsForOPML, url=root_url)
         self.set_root_item(root_item)
 
         self.init_completed()
@@ -140,7 +140,7 @@ class RadiotimeStore(AbstractBackendStore):
                     external_id = "%s_%s" % (parent.external_id, key)
                 if external_id is None:
                     external_id = outline_url
-                item = LazyContainer(parent, text, external_id, self.refresh, self.retrieveItemsForOPML, url=outline_url)
+                item = LazyContainerWithPaging(parent, text, external_id, self.refresh, self.retrieveItemsForOPML, url=outline_url)
                 parent.add_child(item, external_id=external_id)
 
             elif type == 'audio':

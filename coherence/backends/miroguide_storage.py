@@ -13,7 +13,7 @@ import urllib
 
 from coherence.upnp.core import utils
 from coherence.upnp.core import DIDLLite
-from coherence.backend import BackendStore, BackendItem, Container, LazyContainer, \
+from coherence.backend import BackendStore, BackendItem, Container, LazyContainerWithPaging, \
      AbstractBackendStore
 
 from coherence.backends.youtube_storage import TestVideoProxy
@@ -151,15 +151,15 @@ class MiroGuideStore(AbstractBackendStore):
         return self.__class__.__name__
 
     def appendCategory(self, name, category_id, parent):
-        item = LazyContainer(parent, name, category_id, self.refresh, self.retrieveChannels, filter="category", filter_value=category_id, per_page=100)
+        item = LazyContainerWithPaging(parent, name, category_id, self.refresh, self.retrieveChannels, filter="category", filter_value=category_id, per_page=100)
         parent.add_child(item, external_id=category_id)
 
     def appendLanguage(self, name, language_id, parent, sort='name', count=0):
-        item = LazyContainer(parent, name, language_id, self.refresh, self.retrieveChannels, filter="language", filter_value=language_id, per_page=100, sort=sort, count=count)
+        item = LazyContainerWithPaging(parent, name, language_id, self.refresh, self.retrieveChannels, filter="language", filter_value=language_id, per_page=100, sort=sort, count=count)
         parent.add_child(item, external_id=language_id)
 
     def appendChannel(self, name, channel_id, parent):
-        item = LazyContainer(parent, name, channel_id, self.refresh, self.retrieveChannelItems, channel_id=channel_id)
+        item = LazyContainerWithPaging(parent, name, channel_id, self.refresh, self.retrieveChannelItems, channel_id=channel_id)
         parent.add_child(item, external_id=channel_id)
 
     def upnp_init(self):

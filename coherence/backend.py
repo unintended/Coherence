@@ -64,8 +64,7 @@ class Backend(log.Loggable, Plugin):
             this method just accepts any form of arguments
             as we don't under which circumstances it is called
         """
-        louie.send('Coherence.UPnP.Backend.init_completed',
-                None, backend=self)
+        louie.send('Coherence.UPnP.Backend.init_completed', None, backend=self)
 
     def upnp_init(self):
         """ this method gets called after the device is fired,
@@ -412,6 +411,33 @@ class Container(BackendItem):
 
 
 class LazyContainer(Container):
+  logCategory = 'lazyContainer'
+
+  def __init__(self, parent, title, external_id=None, refresh=0, children_retriever=None, **kwargs):
+    Container.__init__(self, parent, title)
+
+    self.do_retrieve = True
+
+    self.external_id = external_id
+
+    self.last_updated = 0
+    self.refresh = refresh
+
+  def get_children(self, start=0, request_count=0):
+    # Check if an update is needed since last update
+    current_time = time.time()
+    delay_since_last_updated = current_time - self.last_updated
+    period = self.refresh
+    if (period > 0) and (delay_since_last_updated > period):
+      self.info("Last update is older than %d s -> update data", period)
+      self.do_retrieve = True
+
+    if self.childrenRetrievingNeeded:
+      return self.retrieve_all_children(start, request_count)
+    return Container.get_children(self, start, request_count)
+
+
+class LazyContainerWithPaging(Container):
     logCategory = 'lazyContainer'
 
     def __init__(self, parent, title, external_id=None, refresh=0, childrenRetriever=None, **kwargs):
@@ -423,9 +449,8 @@ class LazyContainer(Container):
         self.children_retrieval_campaign_in_progress = False
         self.childrenRetriever_params = kwargs
         self.childrenRetriever_params['parent'] = self
-        self.has_pages = (self.childrenRetriever_params.has_key('per_page'))
+        self.has_pages = 'per_page' in self.childrenRetriever_params
 
-        self.external_id = None
         self.external_id = external_id
 
         self.retrieved_children = {}
@@ -509,7 +534,7 @@ class LazyContainer(Container):
             return self.retrieved_children
 
         self.childrenRetrievingNeeded = False
-        if self.has_pages is True:
+        if self.has_pages:
             self.childrenRetriever_params['offset'] = start
             self.childrenRetriever_params['page'] = page
         d = self.childrenRetriever(**self.childrenRetriever_params)
@@ -520,11 +545,11 @@ class LazyContainer(Container):
 
         def all_items_retrieved(result):
             self.end_children_retrieval_campaign(True)
-            return super(LazyContainer, self).get_children(start, request_count)
+            return super(LazyContainerWithPaging, self).get_children(start, request_count)
 
         def error_while_retrieving_items(error):
             self.end_children_retrieval_campaign(False)
-            return super(LazyContainer, self).get_children(start, request_count)
+            return super(LazyContainerWithPaging, self).get_children(start, request_count)
 
         self.start_children_retrieval_campaign()
         if self.childrenRetriever is not None:
@@ -546,7 +571,7 @@ class LazyContainer(Container):
             self.info("Last update is older than %d s -> update data", period)
             self.childrenRetrievingNeeded = True
 
-        if self.childrenRetrievingNeeded is True:
+        if self.childrenRetrievingNeeded:
             return self.retrieve_all_children(start, request_count)
         return Container.get_children(self, start, request_count)
 

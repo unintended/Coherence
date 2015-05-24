@@ -13,7 +13,7 @@ import urllib
 import mimetypes
 
 from coherence.upnp.core import DIDLLite
-from coherence.backend import BackendItem, Container, LazyContainer, AbstractBackendStore
+from coherence.backend import BackendItem, Container, LazyContainerWithPaging, AbstractBackendStore
 from coherence.upnp.core.utils import getPage
 
 
@@ -189,7 +189,7 @@ class YamjStore(AbstractBackendStore):
                     parent = categoryItem
                     if (type == 'Other'):
                         parent = parent_item
-                    indexItem = LazyContainer(parent, name, None, self.refresh, self.retrieveIndexMovies, per_page=1, name=name, root_name=root_name)
+                    indexItem = LazyContainerWithPaging(parent, name, None, self.refresh, self.retrieveIndexMovies, per_page=1, name=name, root_name=root_name)
                     parent.add_child(indexItem)
             self.init_completed()
 
@@ -241,7 +241,7 @@ class YamjStore(AbstractBackendStore):
                     index_name = movie.find('./baseFilename').text
                     set_root_name = index_name[:-2]
                     self.debug("adding set %s", name)
-                    indexItem = LazyContainer(parent, name, None, self.refresh, self.retrieveIndexMovies, per_page=1, name=name, root_name=set_root_name)
+                    indexItem = LazyContainerWithPaging(parent, name, None, self.refresh, self.retrieveIndexMovies, per_page=1, name=name, root_name=set_root_name)
                     parent.add_child(indexItem, set_root_name)
 
                 else:

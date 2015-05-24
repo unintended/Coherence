@@ -15,7 +15,7 @@ from coherence.upnp.core.utils import ReverseProxyUriResource
 from twisted.internet import task
 from coherence.upnp.core import utils
 from coherence.upnp.core import DIDLLite
-from coherence.backend import BackendStore, BackendItem, Container, LazyContainer, \
+from coherence.backend import BackendStore, BackendItem, Container, LazyContainerWithPaging, \
      AbstractBackendStore
 from coherence import log
 
@@ -120,10 +120,10 @@ class PicasaStore(AbstractBackendStore):
         rootContainer = Container(None, self.name)
         self.set_root_item(rootContainer)
 
-        self.AlbumsContainer = LazyContainer(rootContainer, 'My Albums', None, self.refresh, self.retrieveAlbums)
+        self.AlbumsContainer = LazyContainerWithPaging(rootContainer, 'My Albums', None, self.refresh, self.retrieveAlbums)
         rootContainer.add_child(self.AlbumsContainer)
 
-        self.FeaturedContainer = LazyContainer(rootContainer, 'Featured photos', None, self.refresh, self.retrieveFeaturedPhotos)
+        self.FeaturedContainer = LazyContainerWithPaging(rootContainer, 'Featured photos', None, self.refresh, self.retrieveFeaturedPhotos)
         rootContainer.add_child(self.FeaturedContainer)
 
         self.init_completed()
@@ -164,7 +164,7 @@ class PicasaStore(AbstractBackendStore):
             for album in albums.entry:
                 title = album.title.text
                 album_id = album.gphoto_id.text
-                item = LazyContainer(parent, title, album_id, self.refresh, self.retrieveAlbumPhotos, album_id=album_id)
+                item = LazyContainerWithPaging(parent, title, album_id, self.refresh, self.retrieveAlbumPhotos, album_id=album_id)
                 parent.add_child(item, external_id=album_id)
 
         def gotError(error):

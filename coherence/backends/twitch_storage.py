@@ -24,7 +24,7 @@ import urllib
 from coherence.log import Loggable
 from dateutil import parser as dateutil_parser
 import livestreamer
-from coherence.backend import AbstractBackendStore, Container, BackendItem, LazyContainer
+from coherence.backend import AbstractBackendStore, Container, BackendItem, LazyContainerWithPaging
 from coherence.upnp.core import utils, DIDLLite
 from twisted.internet import threads
 from twisted.python.failure import Failure
@@ -78,7 +78,7 @@ class LiveStreamerProxyResource(Resource, Loggable):
     return server.NOT_DONE_YET
 
 
-class TwitchLazyContainer(LazyContainer):
+class TwitchLazyContainer(LazyContainerWithPaging):
   logCategory = 'twitch_store'
 
   def __init__(self, parent, title, limit=None, **kwargs):

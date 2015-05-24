@@ -23,7 +23,7 @@ from urlparse import urlsplit
 
 import re
 from coherence.upnp.core.utils import getPage
-from coherence.backend import BackendStore, BackendItem, Container, LazyContainer, \
+from coherence.backend import BackendStore, BackendItem, Container, LazyContainerWithPaging, \
      AbstractBackendStore
 
 
