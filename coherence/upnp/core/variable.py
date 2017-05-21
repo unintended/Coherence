@@ -15,7 +15,7 @@ try:
     #
     from coherence.upnp.core import service
 except ImportError:
-    import service
+    from . import service
 
 from coherence import log
 
@@ -62,7 +62,7 @@ class StateVariable(log.Loggable):
             r.append(('Evented', 'no'))
         r.append(('Data Type', self.data_type))
         r.append(('Default Value', self.default_value))
-        r.append(('Current Value', unicode(self.value)))
+        r.append(('Current Value', str(self.value)))
         if(self.allowed_values != None and len(self.allowed_values) > 0):
             r.append(('Allowed Values', ','.join(self.allowed_values)))
         return r
@@ -116,7 +116,7 @@ class StateVariable(log.Loggable):
                         new_value = value
             else:
                 if self.data_type == 'string':
-                    if isinstance(value, basestring):
+                    if isinstance(value, str):
                         value = value.split(',')
                     if(isinstance(value, tuple) or
                        isinstance(value, Set)):
@@ -125,7 +125,7 @@ class StateVariable(log.Loggable):
                         value = [value]
                     new_value = []
                     for v in value:
-                        if type(v) == unicode:
+                        if type(v) == str:
                             v = v.encode('utf-8')
                         else:
                             v = str(v)
@@ -148,7 +148,7 @@ class StateVariable(log.Loggable):
                     new_value = int(value)
         else:
             if self.data_type == 'string':
-                if type(value) == unicode:
+                if type(value) == str:
                     value = value.encode('utf-8')
                 else:
                     value = str(value)

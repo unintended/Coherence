@@ -78,7 +78,7 @@ class ProxyStream(utils.ReverseProxyUriResource, log.Loggable):
         if request.clientproto == 'HTTP/1.1':
             self.connection = request.getHeader('connection')
             if self.connection:
-                tokens = map(str.lower, self.connection.split(' '))
+                tokens = list(map(str.lower, self.connection.split(' ')))
                 if 'close' in tokens:
                     d = request.notifyFinish()
                     d.addBoth(self.requestFinished)
@@ -108,7 +108,7 @@ class Container(BackendItem):
 
     def add_child(self, child):
         id = child.id
-        if isinstance(child.id, basestring):
+        if isinstance(child.id, str):
             _, id = child.id.split('.')
         if self.children is None:
             self.children = []
@@ -231,7 +231,7 @@ class ITVStore(BackendStore):
         return len(self.store)
 
     def get_by_id(self, id):
-        if isinstance(id, basestring):
+        if isinstance(id, str):
             id = id.split('@', 1)
             id = id[0]
         try:
@@ -300,7 +300,7 @@ class ITVStore(BackendStore):
                 genreItem = self.appendGenre(genre, parent)
                 genreItems[genre] = genreItem
 
-            for station in stations.values():
+            for station in list(stations.values()):
                 genre = station.get('genre')
                 parentItem = genreItems[genre]
                 self.appendFeed({'name': station.get('name'),

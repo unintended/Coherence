@@ -221,7 +221,7 @@ class AppleTrailersStore(BackendStore):
             self.server.connection_manager_server.set_variable( \
                 0, 'SourceProtocolInfo', ['http-get:*:video/quicktime:*', 'http-get:*:video/mp4:*'])
         self.container = Container(ROOT_ID, -1, self.name)
-        trailers = self.trailers.values()
+        trailers = list(self.trailers.values())
         trailers.sort(cmp=lambda x, y: cmp(x.get_name().lower(), y.get_name().lower()))
         self.container.children = trailers
 

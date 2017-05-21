@@ -54,9 +54,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Cohen'
-copyright = u'2015, unintended'
-author = u'unintended'
+project = 'Cohen'
+copyright = '2015, unintended'
+author = 'unintended'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -226,7 +226,7 @@ htmlhelp_basename = 'Cohendoc'
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-  ('cli', 'Cohen', u'DLNA/UPnP Media Server', [author, "Frank Scholz"], 1)
+  ('cli', 'Cohen', 'DLNA/UPnP Media Server', [author, "Frank Scholz"], 1)
 ]
 
 # If true, show URL addresses after external links.

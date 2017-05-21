@@ -11,13 +11,13 @@ TODO:
 
 """
 import string
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from datetime import datetime
 
 from lxml import etree
 from coherence.upnp.core import utils
 from coherence import log
-import xml_constants
+from . import xml_constants
 
 
 def qname(tag, ns=None):
@@ -348,14 +348,14 @@ class PlayContainerResource(Resource):
             raise AttributeError('missing first Child Id')
         self.protocolInfo = protocol_info
 
-        args = ['sid=' + urllib.quote(sid),
-                'cid=' + urllib.quote(str(cid)),
-                'fid=' + urllib.quote(str(fid)),
-                'fii=' + urllib.quote(str(fii)),
-                'sc=' + urllib.quote(''),
-                'md=' + urllib.quote(str(0))]
+        args = ['sid=' + urllib.parse.quote(sid),
+                'cid=' + urllib.parse.quote(str(cid)),
+                'fid=' + urllib.parse.quote(str(fid)),
+                'fii=' + urllib.parse.quote(str(fii)),
+                'sc=' + urllib.parse.quote(''),
+                'md=' + urllib.parse.quote(str(0))]
 
-        self.data = 'dlna-playcontainer://' + urllib.quote(str(udn)) \
+        self.data = 'dlna-playcontainer://' + urllib.parse.quote(str(udn)) \
                                             + '?' + '&'.join(args)
 
         if self.protocolInfo is None:
@@ -758,7 +758,7 @@ class VideoItem(Item):
     def toElement(self, **kwargs):
         root = Item.toElement(self, **kwargs)
 
-        for attr_name, ns in self.valid_attrs.iteritems():
+        for attr_name, ns in self.valid_attrs.items():
             value = getattr(self, attr_name, None)
             if value:
                 self.debug("Setting value {%s}%s=%s", ns, attr_name, value)
@@ -771,7 +771,7 @@ class VideoItem(Item):
         for child in elt.getchildren():
             tag = child.tag
             val = child.text
-            if tag in self.valid_attrs.keys():
+            if tag in list(self.valid_attrs.keys()):
                 setattr(self, tag, val)
 
 
@@ -1029,4 +1029,4 @@ if __name__ == '__main__':
     res.append(Resource('7', 'http-get:*:*:*'))
 
     for r in res:
-        print r.data, r.protocolInfo
+        print(r.data, r.protocolInfo)

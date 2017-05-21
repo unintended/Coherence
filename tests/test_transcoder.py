@@ -47,7 +47,7 @@ class TestTranscoderAutoloading(TranscoderTestMixin, TestCase):
   process_config = {'name': 'megaprocess', 'pipeline': 'uiui%suiui',
                     'type': 'process', 'target': 'yay'}
 
-  bad_name_config = {'name': u'so bäd', 'pipeline': 'fake %s',
+  bad_name_config = {'name': 'so bäd', 'pipeline': 'fake %s',
                      'type': 'process', 'target': 'norway'}
 
   def setUp(self):
@@ -108,7 +108,7 @@ class TestTranscoderAutoloading(TranscoderTestMixin, TestCase):
     coherence = self.CoherenceStump(transcoder=self.bad_name_config)
     self.manager = tc.TranscoderManager(coherence)
     self._check_for_transcoders(known_transcoders)
-    self.assertRaises(KeyError, self.manager.select, u'so bäd',
+    self.assertRaises(KeyError, self.manager.select, 'so bäd',
                       'http://another/uri')
 
   def test_is_loading_multiple_from_config(self):

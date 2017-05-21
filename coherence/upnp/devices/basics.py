@@ -28,7 +28,7 @@ class DeviceHttpRoot(resource.Resource, log.Loggable):
         self.info('DeviceHttpRoot %s getChildWithDefault %s %s %s',
                   self.server.device_type, path, request.uri, request.client)
         self.info(request.getAllHeaders())
-        if self.children.has_key(path):
+        if path in self.children:
             return self.children[path]
         if request.uri == '/':
             return self
@@ -203,7 +203,7 @@ class BasicDeviceMixin(object):
         kwargs['urlbase'] = self.urlbase
         self.icons = kwargs.get('iconlist', kwargs.get('icons', []))
         if len(self.icons) == 0:
-            if kwargs.has_key('icon'):
+            if 'icon' in kwargs:
                 if isinstance(kwargs['icon'], dict):
                     self.icons.append(kwargs['icon'])
                 else:

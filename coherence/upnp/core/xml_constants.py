@@ -26,7 +26,7 @@ namespaces = {
   UPNP_EVENT_NS: 'e',
 }
 
-for k, v in namespaces.iteritems():
+for k, v in namespaces.items():
   etree.register_namespace(v, k)
 
 

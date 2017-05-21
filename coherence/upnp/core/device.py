@@ -7,12 +7,13 @@
 import time
 
 from lxml import etree
-import xml_constants
+from . import xml_constants
 from twisted.internet import defer
 from coherence.upnp.core.service import Service
 from coherence.upnp.core import utils
 from coherence import log
 import coherence.extern.louie as louie
+import collections
 
 ns = xml_constants.UPNP_DEVICE_NS
 
@@ -146,7 +147,7 @@ class Device(log.Loggable):
         try:
             return self._markup_name
         except AttributeError:
-            self._markup_name = u"%s:%s %s" % (self.friendly_device_type,
+            self._markup_name = "%s:%s %s" % (self.friendly_device_type,
                     self.device_type_version, self.friendly_name)
             return self._markup_name
 
@@ -189,10 +190,10 @@ class Device(log.Loggable):
 
     def parse_device(self, d):
         self.info("parse_device %r", d)
-        self.device_type = unicode(d.findtext('./{%s}deviceType' % ns))
+        self.device_type = str(d.findtext('./{%s}deviceType' % ns))
         self.friendly_device_type, self.device_type_version = \
                 self.device_type.split(':')[-2:]
-        self.friendly_name = unicode(d.findtext('./{%s}friendlyName' % ns))
+        self.friendly_name = str(d.findtext('./{%s}friendlyName' % ns))
         self.udn = d.findtext('./{%s}UDN' % ns)
         self.info("found udn %r %r", self.udn, self.friendly_name)
 
@@ -256,7 +257,7 @@ class Device(log.Loggable):
 
         icon_list = d.find('./{%s}iconList' % ns)
         if icon_list is not None:
-            import urllib2
+            import urllib.request, urllib.error, urllib.parse
             url_base = "%s://%s" % urllib2.urlparse.urlparse(self.get_location())[:2]
             for icon in icon_list.findall('./{%s}icon' % ns):
                 try:
@@ -341,13 +342,13 @@ class Device(log.Loggable):
         def append(name, attribute):
             try:
                 if isinstance(attribute, tuple):
-                    if callable(attribute[0]):
+                    if isinstance(attribute[0], collections.Callable):
                         v1 = attribute[0]()
                     else:
                         v1 = getattr(self, attribute[0])
                     if v1 in [None, 'None']:
                         return
-                    if callable(attribute[1]):
+                    if isinstance(attribute[1], collections.Callable):
                         v2 = attribute[1]()
                     else:
                         v2 = getattr(self, attribute[1])
@@ -355,7 +356,7 @@ class Device(log.Loggable):
                         return
                     r.append((name, (v1, v2)))
                     return
-                elif callable(attribute):
+                elif isinstance(attribute, collections.Callable):
                     v = attribute()
                 else:
                     v = getattr(self, attribute)
@@ -567,12 +568,12 @@ class RootDevice(Device):
     def make_fullyqualified(self, url):
         if url.startswith('http://'):
             return url
-        import urlparse
+        import urllib.parse
         base = self.get_urlbase()
         if base != None:
             if base[-1] != '/':
                 base += '/'
-            r = urlparse.urljoin(base, url)
+            r = urllib.parse.urljoin(base, url)
         else:
-            r = urlparse.urljoin(self.get_location(), url)
+            r = urllib.parse.urljoin(self.get_location(), url)
         return r

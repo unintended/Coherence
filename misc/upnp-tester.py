@@ -32,7 +32,7 @@ try:
     from twisted.names import client as namesclient
     from twisted.names import dns
 
-    import StringIO
+    import io
 
 
     class SMTPClient(smtp.ESMTPClient):
@@ -69,10 +69,10 @@ try:
             fp.close()
             tar.add_header('Content-Disposition', 'attachment', filename=os.path.basename(self.mail_file))
             msg.attach(tar)
-            return StringIO.StringIO(msg.as_string())
+            return io.StringIO(msg.as_string())
 
         def sentMail(self, code, resp, numOk, addresses, log):
-            print 'Sent', numOk, 'messages'
+            print('Sent', numOk, 'messages')
 
 
     class SMTPClientFactory(protocol.ClientFactory):
@@ -162,7 +162,7 @@ class UI(basic.LineReceiver):
 
                 dl = defer.DeferredList(l)
                 dl.addCallback(finished)
-            except Exception, msg:
+            except Exception as msg:
                 self.transport.write(str("problem creating download directory %s\n" % msg))
 
     def cmd_send(self, args):

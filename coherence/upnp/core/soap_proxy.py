@@ -77,7 +77,7 @@ class SOAPProxy(log.Loggable):
 
         def print_c(e):
             for c in e.getchildren():
-                print c, c.tag
+                print(c, c.tag)
                 print_c(c)
 
         self.debug("result: %r", page)

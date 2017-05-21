@@ -14,7 +14,7 @@ GITHUB_ISSUE_URL = "https://github.com/{0}/issues/{1}"
 GITHUB_USER_URL = "https://github.com/{1}"
 
 if sys.version_info[0] == 2:
-  str = unicode
+  str = str
 
 
 class GithubReferences(Transform):

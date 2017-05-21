@@ -6,6 +6,7 @@ from lxml import etree
 
 import time
 import mimetypes
+import collections
 mimetypes.init()
 
 try:
@@ -53,7 +54,7 @@ AUDIO_TAG_CONTAINER_ID = 106
 
 VIDEO_CONTAINER_ID = 200
 
-from urlparse import urlsplit
+from urllib.parse import urlsplit
 
 
 class ProxySong(utils.ReverseProxyResource):
@@ -109,7 +110,7 @@ class Container(BackendItem):
            end - start == 0):
             end = start + 250
 
-        if callable(self.children):
+        if isinstance(self.children, collections.Callable):
             return self.children(start, end - start)
         else:
             children = self.children
@@ -120,7 +121,7 @@ class Container(BackendItem):
 
     def get_child_count(self):
         if self.childCount == None:
-            if callable(self.children):
+            if isinstance(self.children, collections.Callable):
                 self.childCount = len(self.children())
             else:
                 self.childCount = len(self.children)
@@ -624,10 +625,10 @@ class AmpacheStore(BackendStore):
 
     def get_by_id(self, id):
         self.info("looking for id %r", id)
-        if isinstance(id, basestring):
+        if isinstance(id, str):
             id = id.split('@', 1)
             id = id[0]
-        if isinstance(id, basestring) and id.startswith('artist_all_tracks_'):
+        if isinstance(id, str) and id.startswith('artist_all_tracks_'):
             try:
                 return self.containers[id]
             except:
@@ -649,7 +650,7 @@ class AmpacheStore(BackendStore):
         self.info("got_auth_response %r", response)
         try:
             response = etree.fromstring(response)
-        except SyntaxError, msg:
+        except SyntaxError as msg:
             self.warning('error parsing ampache answer %r', msg)
             raise SyntaxError('error parsing ampache answer %r' % msg)
         try:
@@ -944,11 +945,11 @@ class AmpacheStore(BackendStore):
         wmc_mapping = getattr(self, "wmc_mapping", None)
         if(kwargs.get('X_UPnPClient', '') == 'XBox' and
             wmc_mapping != None and
-            wmc_mapping.has_key(ObjectID)):
+            ObjectID in wmc_mapping):
             """ fake a Windows Media Connect Server
             """
             root_id = wmc_mapping[ObjectID]
-            if callable(root_id):
+            if isinstance(root_id, collections.Callable):
                 item = root_id()
                 if item  is not None:
                     if isinstance(item, list):
@@ -1036,7 +1037,7 @@ if __name__ == '__main__':
 
     def main():
         def got_result(result):
-            print "got_result"
+            print("got_result")
 
         def call_browse(ObjectID=0, StartingIndex=0, RequestedCount=0):
             r = f.backend.upnp_Browse(BrowseFlag='BrowseDirectChildren',

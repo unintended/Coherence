@@ -16,6 +16,7 @@ from coherence.upnp.core.soap_service import errorCode
 from coherence.upnp.core.DIDLLite import DIDLElement
 
 from coherence.upnp.core import service
+import collections
 
 
 class ContentDirectoryControl(service.ServiceControl, UPnPPublisher):
@@ -144,11 +145,11 @@ class ContentDirectoryServer(service.ServiceServer, resource.Resource):
         wmc_mapping = getattr(self.backend, "wmc_mapping", None)
         if kwargs.get('X_UPnPClient', '') == 'XBox':
             if(wmc_mapping is not None and
-               wmc_mapping.has_key(ContainerID)):
+               ContainerID in wmc_mapping):
                 """ fake a Windows Media Connect Server
                 """
                 root_id = wmc_mapping[ContainerID]
-                if callable(root_id):
+                if isinstance(root_id, collections.Callable):
                     item = root_id()
                     if item is not None:
                         if isinstance(item, list):
@@ -291,11 +292,11 @@ class ContentDirectoryServer(service.ServiceServer, resource.Resource):
 
         wmc_mapping = getattr(self.backend, "wmc_mapping", None)
         if kwargs.get('X_UPnPClient', '') == 'XBox' and \
-                wmc_mapping is not None and wmc_mapping.has_key(ObjectID):
+                wmc_mapping is not None and ObjectID in wmc_mapping:
             """ fake a Windows Media Connect Server
             """
             root_id = wmc_mapping[ObjectID]
-            if callable(root_id):
+            if isinstance(root_id, collections.Callable):
                 item = root_id()
                 if item is not None:
                     if isinstance(item, list):
