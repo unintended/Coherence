@@ -22,7 +22,7 @@ NS_XSD = "http://www.w3.org/1999/XMLSchema"
 NS_UPNP_ORG_CONTROL_1_0 = 'urn:schemas-upnp-org:control-1-0'
 
 TYPE_MAP = {str: 'string',
-            unicode: 'string',
+            str: 'string',
             int: 'int',
             float: 'float',
             bool: 'boolean'}
@@ -93,7 +93,7 @@ def build_soap_call(method, arguments, ns=None,
 
   # append the arguments
   if isinstance(arguments, (dict, OrderedDict)):
-    for arg_name, arg_val in arguments.iteritems():
+    for arg_name, arg_val in arguments.items():
       if type(arg_val) in TYPE_MAP:
         arg_type = TYPE_MAP[type(arg_val)]
         if arg_type == 'int' or arg_type == 'float':

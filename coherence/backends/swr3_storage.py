@@ -66,7 +66,7 @@ class Container(BackendItem):
 
     def add_child(self, child):
         id = child.id
-        if isinstance(child.id, basestring):
+        if isinstance(child.id, str):
             _, id = child.id.split('.')
         self.children.append(child)
         self.item.childCount += 1
@@ -144,7 +144,7 @@ class SWR3Store(BackendStore, BackendRssMixin):
         return self.next_id
 
     def get_by_id(self, id):
-        if isinstance(id, basestring):
+        if isinstance(id, str):
             id = id.split('@', 1)
             id = id[0]
         try:

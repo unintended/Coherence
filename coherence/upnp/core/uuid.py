@@ -6,7 +6,7 @@
 # Copyright 2013, Hartmut Goebel <h.goebel@crazy-compilers.com>
 #
 
-from __future__ import absolute_import
+
 
 from uuid import uuid4
 

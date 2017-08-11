@@ -65,23 +65,23 @@ class SSDPServer(DatagramProtocol, log.Loggable):
                 if self.known[st]['MANIFESTATION'] == 'local':
                     self.doByebye(st)
 
-    def datagramReceived(self, data, (host, port)):
+    def datagramReceived(self, data, xxx_todo_changeme):
         """Handle a received multicast datagram."""
-
+        (host, port) = xxx_todo_changeme
         try:
             header, payload = data.split('\r\n\r\n')[:2]
-        except ValueError, err:
-            print err
-            print 'Arggg,', data
+        except ValueError as err:
+            print(err)
+            print('Arggg,', data)
             import pdb; pdb.set_trace()
 
         lines = header.split('\r\n')
         cmd = string.split(lines[0], ' ')
-        lines = map(lambda x: x.replace(': ', ':', 1), lines[1:])
-        lines = filter(lambda x: len(x) > 0, lines)
+        lines = [x.replace(': ', ':', 1) for x in lines[1:]]
+        lines = [x for x in lines if len(x) > 0]
 
         headers = [string.split(x, ':', 1) for x in lines]
-        headers = dict(map(lambda x: (x[0].lower(), x[1]), headers))
+        headers = dict([(x[0].lower(), x[1]) for x in headers])
 
         self.msg('SSDP command %s %s - from %s:%d', cmd[0], cmd[1], host, port)
         self.debug('with headers: %s', headers)
@@ -140,12 +140,12 @@ class SSDPServer(DatagramProtocol, log.Loggable):
         del self.known[usn]
 
     def isKnown(self, usn):
-        return self.known.has_key(usn)
+        return usn in self.known
 
-    def notifyReceived(self, headers, (host, port)):
+    def notifyReceived(self, headers, xxx_todo_changeme1):
         """Process a presence announcement.  We just remember the
         details of the SSDP service announced."""
-
+        (host, port) = xxx_todo_changeme1
         self.info('Notification from (%s,%d) for %s', host, port, headers['nt'])
         self.debug('Notification headers: %s', headers)
 
@@ -168,20 +168,20 @@ class SSDPServer(DatagramProtocol, log.Loggable):
         self.info('send discovery response delayed by %ds for %s to %r', delay, usn, destination)
         try:
             self.transport.write(response, destination)
-        except (AttributeError, socket.error), msg:
+        except (AttributeError, socket.error) as msg:
             self.info("failure sending out byebye notification: %r", msg)
 
-    def discoveryRequest(self, headers, (host, port)):
+    def discoveryRequest(self, headers, xxx_todo_changeme2):
         """Process a discovery request.  The response must be sent to
         the address specified by (host, port)."""
-
+        (host, port) = xxx_todo_changeme2
         self.info('Discovery request from (%s,%d) for %s', host, port, headers['st'])
         self.info('Discovery request for %s', headers['st'])
 
         louie.send('Coherence.UPnP.Log', None, 'SSDP', host, 'M-Search for %s' % headers['st'])
 
         # Do we know about this service?
-        for i in self.known.values():
+        for i in list(self.known.values()):
             if i['MANIFESTATION'] == 'remote':
                 continue
             if(headers['st'] == 'ssdp:all' and
@@ -192,7 +192,7 @@ class SSDPServer(DatagramProtocol, log.Loggable):
                 response = []
                 response.append('HTTP/1.1 200 OK')
 
-                for k, v in i.items():
+                for k, v in list(i.items()):
                     if k == 'USN':
                         usn = v
                     if k not in ('MANIFESTATION', 'SILENT', 'HOST'):
@@ -216,7 +216,7 @@ class SSDPServer(DatagramProtocol, log.Loggable):
             'HOST: %s:%d' % (SSDP_ADDR, SSDP_PORT),
             'NTS: ssdp:alive',
             ]
-        stcpy = dict(self.known[usn].iteritems())
+        stcpy = dict(iter(self.known[usn].items()))
         stcpy['NT'] = stcpy['ST']
         del stcpy['ST']
         del stcpy['MANIFESTATION']
@@ -224,13 +224,13 @@ class SSDPServer(DatagramProtocol, log.Loggable):
         del stcpy['HOST']
         del stcpy['last-seen']
 
-        resp.extend(map(lambda x: ': '.join(x), stcpy.iteritems()))
+        resp.extend([': '.join(x) for x in iter(stcpy.items())])
         resp.extend(('', ''))
         self.debug('doNotify content %s', resp)
         try:
             self.transport.write('\r\n'.join(resp), (SSDP_ADDR, SSDP_PORT))
             self.transport.write('\r\n'.join(resp), (SSDP_ADDR, SSDP_PORT))
-        except (AttributeError, socket.error), msg:
+        except (AttributeError, socket.error) as msg:
             self.info("failure sending out alive notification: %r", msg)
 
     def doByebye(self, usn):
@@ -243,22 +243,22 @@ class SSDPServer(DatagramProtocol, log.Loggable):
                 'NTS: ssdp:byebye',
                 ]
         try:
-            stcpy = dict(self.known[usn].iteritems())
+            stcpy = dict(iter(self.known[usn].items()))
             stcpy['NT'] = stcpy['ST']
             del stcpy['ST']
             del stcpy['MANIFESTATION']
             del stcpy['SILENT']
             del stcpy['HOST']
             del stcpy['last-seen']
-            resp.extend(map(lambda x: ': '.join(x), stcpy.iteritems()))
+            resp.extend([': '.join(x) for x in iter(stcpy.items())])
             resp.extend(('', ''))
             self.debug('doByebye content %s', resp)
             if self.transport:
                 try:
                     self.transport.write('\r\n'.join(resp), (SSDP_ADDR, SSDP_PORT))
-                except (AttributeError, socket.error), msg:
+                except (AttributeError, socket.error) as msg:
                     self.info("failure sending out byebye notification: %r", msg)
-        except KeyError, msg:
+        except KeyError as msg:
             self.debug("error building byebye notification: %r", msg)
 
     def resendNotify(self):

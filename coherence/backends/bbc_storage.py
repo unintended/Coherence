@@ -64,7 +64,7 @@ class Container(BackendItem):
 
     def add_child(self, child):
         id = child.id
-        if isinstance(child.id, basestring):
+        if isinstance(child.id, str):
             _, id = child.id.split('.')
         self.children.append(child)
         self.item.childCount += 1
@@ -122,7 +122,7 @@ class BBCStore(BackendStore):
 
     def get_by_id(self, id):
         #print "looking for id %r" % id
-        if isinstance(id, basestring):
+        if isinstance(id, str):
             id = id.split('@', 1)
             id = id[0]
         try:
@@ -140,7 +140,7 @@ class BBCStore(BackendStore):
     def update_data(self):
 
         def fail(f):
-            print "fail", f
+            print("fail", f)
             return f
 
         dfr = getPage(self.rss_url)

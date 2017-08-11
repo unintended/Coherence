@@ -19,6 +19,7 @@ import dbus.service
 import coherence.extern.louie as louie
 
 from coherence.backend import BackendItem, BackendStore
+import collections
 
 ROOT_CONTAINER_ID = 0
 AUDIO_CONTAINER_ID = 100
@@ -89,7 +90,7 @@ class Container(BackendItem):
 
     def add_child(self, child):
         id = child.id
-        if isinstance(child.id, basestring):
+        if isinstance(child.id, str):
             _, id = child.id.split('.')
         self.children[id] = child
         if self.item.childCount != None:
@@ -98,10 +99,10 @@ class Container(BackendItem):
     def get_children(self, start=0, end=0):
         self.info("container.get_children %r %r", start, end)
 
-        if callable(self.children):
+        if isinstance(self.children, collections.Callable):
             return self.children(start, end - start)
         else:
-            children = self.children.values()
+            children = list(self.children.values())
         if end == 0:
             return children[start:]
         else:
@@ -111,7 +112,7 @@ class Container(BackendItem):
         if self.item.childCount != None:
             return self.item.childCount
 
-        if callable(self.children):
+        if isinstance(self.children, collections.Callable):
             return len(self.children())
         else:
             return len(self.children)
@@ -148,7 +149,7 @@ class Artist(BackendItem):
                 r = cmp(self.children[x].name, self.children[y].name)
                 return r
 
-            self.sorted_children = self.children.keys()
+            self.sorted_children = list(self.children.keys())
             self.sorted_children.sort(cmp=childs_sort)
         return self.sorted_children
 
@@ -193,8 +194,8 @@ class Album(BackendItem):
         BackendItem.__init__(self)
         self.store = store
         self.id = 'album.%d' % int(id)
-        self.name = unicode(title)
-        self.artist = unicode(artist)
+        self.name = str(title)
+        self.artist = str(artist)
         self.cover = None
         self.children = {}
         self.sorted_children = None
@@ -213,7 +214,7 @@ class Album(BackendItem):
                 r = cmp(self.children[x].track_nr, self.children[y].track_nr)
                 return r
 
-            self.sorted_children = self.children.keys()
+            self.sorted_children = list(self.children.keys())
             self.sorted_children.sort(cmp=childs_sort)
             for key in self.sorted_children:
                 children.append(self.children[key])
@@ -259,7 +260,7 @@ class Track(BackendItem):
         self.id = 'song.%d' % int(id)
         self.parent_id = parent_id
 
-        self.path = unicode(file)
+        self.path = str(file)
 
         duration = str(duration).strip()
         duration = duration.split('.')[0]
@@ -274,10 +275,10 @@ class Track(BackendItem):
 
         self.bitrate = 0
 
-        self.title = unicode(title)
-        self.artist = unicode(artist)
-        self.album = unicode(album)
-        self.genre = unicode(genre)
+        self.title = str(title)
+        self.artist = str(artist)
+        self.album = str(album)
+        self.genre = str(genre)
         track_number = str(track_number).strip()
         if len(track_number) == 0:
             track_number = 1
@@ -373,7 +374,7 @@ class Video(BackendItem):
         self.id = 'video.%d' % int(id)
         self.parent_id = parent_id
 
-        self.path = unicode(file)
+        self.path = str(file)
 
         duration = str(duration).strip()
         duration = duration.split('.')[0]
@@ -386,7 +387,7 @@ class Video(BackendItem):
         seconds = seconds - minutes * 60
         self.duration = ("%d:%02d:%02d") % (hours, minutes, seconds)
 
-        self.title = unicode(title)
+        self.title = str(title)
 
         self.cover = None
         self.mimetype = str(mimetype)
@@ -448,11 +449,11 @@ class Image(BackendItem):
         self.id = 'image.%d' % int(id)
         self.parent_id = parent_id
 
-        self.path = unicode(file)
+        self.path = str(file)
 
-        self.title = unicode(title)
+        self.title = str(title)
 
-        self.album = unicode(album.strip())
+        self.album = str(album.strip())
         self.mimetype = str(mimetype)
         self.size = int(size)
 
@@ -547,7 +548,7 @@ class TrackerStore(BackendStore):
             louie.send('Coherence.UPnP.Backend.init_failed', None, backend=self, msg=error)
 
         services = kwargs.get('service', 'Music,Videos,Images')
-        services = map(lambda x: x.strip().lower(), services.split(','))
+        services = [x.strip().lower() for x in services.split(',')]
 
         l = []
         mapping = {'music': self.get_tracks,
@@ -570,10 +571,10 @@ class TrackerStore(BackendStore):
 
     def get_by_id(self, id):
         self.info("looking for id %r", id)
-        if isinstance(id, basestring):
+        if isinstance(id, str):
             id = id.split('@', 1)
             id = id[0]
-        if isinstance(id, basestring) and id.startswith('artist_all_tracks_'):
+        if isinstance(id, str) and id.startswith('artist_all_tracks_'):
             try:
                 return self.containers[id]
             except:
@@ -602,7 +603,7 @@ class TrackerStore(BackendStore):
     def get_videos(self):
 
         def handle_error(error):
-            print error
+            print(error)
             return error
 
         def parse_videos_query_result(resultlist):
@@ -615,7 +616,7 @@ class TrackerStore(BackendStore):
                 if len(title) == 0:
                     title = os.path.basename(file)
                 if mimetype == 'video/x-theora+ogg':
-                    mimetype = u'video/ogg'
+                    mimetype = 'video/ogg'
                 video_item = Video(self,
                                    self.videos, VIDEO_ALL_CONTAINER_ID,
                                    file, title, \
@@ -638,8 +639,8 @@ class TrackerStore(BackendStore):
                           children_callback=None)
         self.containers[VIDEO_CONTAINER_ID].add_child(self.containers[VIDEO_ALL_CONTAINER_ID])
 
-        fields = [u'Video:Title', u'Video:Duration',
-                u'File:Size', u'File:Mime']
+        fields = ['Video:Title', 'Video:Duration',
+                'File:Size', 'File:Mime']
 
         d = defer.Deferred()
         d.addCallback(parse_videos_query_result)
@@ -654,7 +655,7 @@ class TrackerStore(BackendStore):
             return error
 
         def parse_images_query_result(resultlist):
-            print "images", resultlist
+            print("images", resultlist)
             images = []
             for image in resultlist:
                 file, _, title, album, \
@@ -685,9 +686,9 @@ class TrackerStore(BackendStore):
                           children_callback=None)
         self.containers[IMAGE_CONTAINER_ID].add_child(self.containers[IMAGE_ALL_CONTAINER_ID])
 
-        fields = [u'Image:Title', u'Image:Album',
-                u'Image:Date', u'Image:Width', u'Image:Height',
-                u'File:Size', u'File:Mime']
+        fields = ['Image:Title', 'Image:Album',
+                'Image:Date', 'Image:Width', 'Image:Height',
+                'File:Size', 'File:Mime']
 
         d = defer.Deferred()
         d.addCallback(parse_images_query_result)
@@ -730,7 +731,7 @@ class TrackerStore(BackendStore):
                     album_item.add_child(track_item)
                 except:
                     album_item = Album(self, self.albums, track_item.album, track_item.artist)
-                    albums[unicode(track_item.album)] = album_item
+                    albums[str(track_item.album)] = album_item
                     self.albums += 1
                     album_item.add_child(track_item)
 
@@ -739,15 +740,15 @@ class TrackerStore(BackendStore):
                         artist_item.add_child(album_item)
                     except:
                         artist_item = Artist(self, self.artists, track_item.artist)
-                        artists[unicode(track_item.artist)] = artist_item
+                        artists[str(track_item.artist)] = artist_item
                         self.artists += 1
                         artist_item.add_child(album_item)
 
-            sorted_keys = albums.keys()
+            sorted_keys = list(albums.keys())
             sorted_keys.sort()
             for key in sorted_keys:
                 self.containers[AUDIO_ALBUM_CONTAINER_ID].add_child(albums[key])
-            sorted_keys = artists.keys()
+            sorted_keys = list(artists.keys())
             sorted_keys.sort()
             for key in sorted_keys:
                 self.containers[AUDIO_ARTIST_CONTAINER_ID].add_child(artists[key])
@@ -794,11 +795,11 @@ class TrackerStore(BackendStore):
                                  '13': lambda: self.get_by_id(AUDIO_PLAYLIST_CONTAINER_ID),  # all playlists
                                 })
 
-        fields = [u'Audio:Title', u'Audio:Artist',
-                u'Audio:Album', u'Audio:Genre',
-                u'Audio:Duration', u'Audio:AlbumTrackCount',
-                u'Audio:TrackNo', u'Audio:Codec',
-                u'File:Size', u'File:Mime']
+        fields = ['Audio:Title', 'Audio:Artist',
+                'Audio:Album', 'Audio:Genre',
+                'Audio:Duration', 'Audio:AlbumTrackCount',
+                'Audio:TrackNo', 'Audio:Codec',
+                'File:Size', 'File:Mime']
 
         d = defer.Deferred()
         d.addCallback(parse_tracks_query_result)

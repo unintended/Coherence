@@ -15,7 +15,7 @@ from coherence.upnp.core import DIDLLite
 import string
 import os
 import platform
-from StringIO import StringIO
+from io import StringIO
 import tokenize
 
 import pygst
@@ -128,7 +128,7 @@ class Player(log.Loggable):
         self.update_LC = LoopingCall(self.update)
 
     def _set_props(self, element, props):
-        for option, value in props.iteritems():
+        for option, value in props.items():
             value = self._py_value(value)
             element.set_property(option, value)
 
@@ -261,7 +261,7 @@ class Player(log.Loggable):
                 self.seek('-0')
             #self.player.set_state(gst.STATE_READY)
         elif t == gst.MESSAGE_TAG:
-            for key in message.parse_tag().keys():
+            for key in list(message.parse_tag().keys()):
                 self.tags[key] = message.structure[key]
             #print self.tags
         elif t == gst.MESSAGE_STATE_CHANGED:
@@ -313,14 +313,14 @@ class Player(log.Loggable):
             self.duration = None
             self.debug("duration unknown")
             return r
-        r[u'raw'] = {u'position': unicode(str(position)), u'remaining': unicode(str(self.duration - position)), u'duration': unicode(str(self.duration))}
+        r['raw'] = {'position': str(str(position)), 'remaining': str(str(self.duration - position)), 'duration': str(str(self.duration))}
 
-        position_human = u'%d:%02d' % (divmod(position / 1000000000, 60))
-        duration_human = u'%d:%02d' % (divmod(self.duration / 1000000000, 60))
-        remaining_human = u'%d:%02d' % (divmod((self.duration - position) / 1000000000, 60))
+        position_human = '%d:%02d' % (divmod(position / 1000000000, 60))
+        duration_human = '%d:%02d' % (divmod(self.duration / 1000000000, 60))
+        remaining_human = '%d:%02d' % (divmod((self.duration - position) / 1000000000, 60))
 
-        r[u'human'] = {u'position': position_human, u'remaining': remaining_human, u'duration': duration_human}
-        r[u'percent'] = {u'position': position * 100 / self.duration, u'remaining': 100 - (position * 100 / self.duration)}
+        r['human'] = {'position': position_human, 'remaining': remaining_human, 'duration': duration_human}
+        r['percent'] = {'position': position * 100 / self.duration, 'remaining': 100 - (position * 100 / self.duration)}
 
         self.debug(r)
         return r
@@ -387,20 +387,20 @@ class Player(log.Loggable):
         _, state, _ = self.player.get_state()
         if state != gst.STATE_PAUSED:
             self.player.set_state(gst.STATE_PAUSED)
-        l = long(location) * 1000000000
+        l = int(location) * 1000000000
         p = self.query_position()
 
         #print p['raw']['position'], l
 
         if location[0] == '+':
-            l = long(p[u'raw'][u'position']) + (long(location[1:]) * 1000000000)
-            l = min(l, long(p[u'raw'][u'duration']))
+            l = int(p['raw']['position']) + (int(location[1:]) * 1000000000)
+            l = min(l, int(p['raw']['duration']))
         elif location[0] == '-':
             if location == '-0':
-                l = 0L
+                l = 0
             else:
-                l = long(p[u'raw'][u'position']) - (long(location[1:]) * 1000000000)
-                l = max(l, 0L)
+                l = int(p['raw']['position']) - (int(location[1:]) * 1000000000)
+                l = max(l, 0)
 
         self.debug("seeking to %r", l)
         """
@@ -421,7 +421,7 @@ class Player(log.Loggable):
             #print "setting new stream time to 0"
             #self.player.set_new_stream_time(0L)
         elif location != '-0':
-            print "seek to %r failed" % location
+            print("seek to %r failed" % location)
 
         if location == '-0':
             content_type, _ = self.mimetype.split("/")
@@ -577,10 +577,10 @@ class GStreamerPlayer(log.Loggable, Plugin):
         for view in self.view:
             view.status(self.status(position))
 
-        if position.has_key(u'raw'):
+        if 'raw' in position:
 
-            if self.duration == None and 'duration' in position[u'raw']:
-                self.duration = int(position[u'raw'][u'duration'])
+            if self.duration == None and 'duration' in position['raw']:
+                self.duration = int(position['raw']['duration'])
                 if self.metadata != None and len(self.metadata) > 0:
                     # FIXME: duration breaks client parsing MetaData?
                     elt = DIDLLite.DIDLElement.fromString(self.metadata)
@@ -600,21 +600,21 @@ class GStreamerPlayer(log.Loggable, Plugin):
                                                   self.metadata)
 
             self.info("%s %d/%d/%d - %d%%/%d%% - %s/%s/%s", state,
-                      string.atol(position[u'raw'][u'position']) / 1000000000,
-                      string.atol(position[u'raw'][u'remaining']) / 1000000000,
-                      string.atol(position[u'raw'][u'duration']) / 1000000000,
-                      position[u'percent'][u'position'],
-                      position[u'percent'][u'remaining'],
-                      position[u'human'][u'position'],
-                      position[u'human'][u'remaining'],
-                      position[u'human'][u'duration'])
+                      string.atol(position['raw']['position']) / 1000000000,
+                      string.atol(position['raw']['remaining']) / 1000000000,
+                      string.atol(position['raw']['duration']) / 1000000000,
+                      position['percent']['position'],
+                      position['percent']['remaining'],
+                      position['human']['position'],
+                      position['human']['remaining'],
+                      position['human']['duration'])
 
-            duration = string.atol(position[u'raw'][u'duration'])
+            duration = string.atol(position['raw']['duration'])
             formatted = self._format_time(duration)
             av_transport.set_variable(conn_id, 'CurrentTrackDuration', formatted)
             av_transport.set_variable(conn_id, 'CurrentMediaDuration', formatted)
 
-            position = string.atol(position[u'raw'][u'position'])
+            position = string.atol(position['raw']['position'])
             formatted = self._format_time(position)
             av_transport.set_variable(conn_id, 'RelativeTimePosition', formatted)
             av_transport.set_variable(conn_id, 'AbsoluteTimePosition', formatted)
@@ -689,30 +689,30 @@ class GStreamerPlayer(log.Loggable, Plugin):
     def status(self, position):
         uri = self.player.get_uri()
         if uri == None:
-            return {u'state': u'idle', u'uri': u''}
+            return {'state': 'idle', 'uri': ''}
         else:
-            r = {u'uri': unicode(uri),
-                 u'position': position}
+            r = {'uri': str(uri),
+                 'position': position}
             if self.tags != {}:
                 try:
-                    r[u'artist'] = unicode(self.tags['artist'])
+                    r['artist'] = str(self.tags['artist'])
                 except:
                     pass
                 try:
-                    r[u'title'] = unicode(self.tags['title'])
+                    r['title'] = str(self.tags['title'])
                 except:
                     pass
                 try:
-                    r[u'album'] = unicode(self.tags['album'])
+                    r['album'] = str(self.tags['album'])
                 except:
                     pass
 
             if self.player.get_state()[1] == gst.STATE_PLAYING:
-                r[u'state'] = u'playing'
+                r['state'] = 'playing'
             elif self.player.get_state()[1] == gst.STATE_PAUSED:
-                r[u'state'] = u'paused'
+                r['state'] = 'paused'
             else:
-                r[u'state'] = u'idle'
+                r['state'] = 'idle'
 
             return r
 
@@ -771,7 +771,7 @@ class GStreamerPlayer(log.Loggable, Plugin):
         """
         dlna-playcontainer://uuid%3Afe814e3e-5214-4c24-847b-383fb599ff01?sid=urn%3Aupnp-org%3AserviceId%3AContentDirectory&cid=1441&fid=1444&fii=0&sc=&md=0
         """
-        from urllib import unquote
+        from urllib.parse import unquote
         from cgi import parse_qs
 
         def handle_reply(r, uri, action, kw):

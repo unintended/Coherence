@@ -6,7 +6,7 @@
 from lxml import etree
 
 import time
-from urlparse import urlsplit
+from urllib.parse import urlsplit
 
 from twisted.internet import reactor, defer
 from twisted.web import resource
@@ -123,7 +123,7 @@ class EventSubscriptionServer(resource.Resource, log.Loggable):
                     s = self.subscribers[headers['sid']]
                     s['timeout'] = headers['timeout']
                     s['created'] = time.time()
-                elif not headers.has_key('callback'):
+                elif 'callback' not in headers:
                     request.setResponseCode(404)
                     request.setHeader('SERVER', SERVER_ID)
                     request.setHeader('CONTENT-LENGTH', 0)

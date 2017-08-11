@@ -26,10 +26,11 @@ from sqlite3 import dbapi2
 import re
 import os
 import time
-from urlparse import urlsplit
-import urllib2
+from urllib.parse import urlsplit
+import urllib.request, urllib.error, urllib.parse
 
 import mimetypes
+import collections
 mimetypes.init()
 mimetypes.add_type('audio/x-m4a', '.m4a')
 mimetypes.add_type('video/mp4', '.mp4')
@@ -102,8 +103,8 @@ class SQLiteDB(Loggable):
         t0 = time.time()
         debug_msg = request
         if params:
-            debug_msg = u"%s params=%r" % (request, params)
-        debug_msg = u''.join(debug_msg.splitlines())
+            debug_msg = "%s params=%r" % (request, params)
+        debug_msg = ''.join(debug_msg.splitlines())
         if debug_msg:
             self.debug('QUERY: %s', debug_msg)
 
@@ -148,7 +149,7 @@ class Container(BackendItem):
             else:
                 return children[start:request_count]
 
-        if callable(self.children):
+        if isinstance(self.children, collections.Callable):
             dfr = defer.maybeDeferred(self.children)
         else:
             dfr = defer.succeed(self.children)
@@ -157,7 +158,7 @@ class Container(BackendItem):
 
     def get_child_count(self):
         count = 0
-        if callable(self.children):
+        if isinstance(self.children, collections.Callable):
             count = defer.maybeDeferred(self.children)
             count.addCallback(lambda children: len(children))
         else:
@@ -500,7 +501,7 @@ class BaseTrack(BackendItem):
         return statinfo, resources
 
     def get_path(self):
-        return urllib2.unquote(self.location[7:].encode('utf-8'))
+        return urllib.parse.unquote(self.location[7:].encode('utf-8'))
 
     def get_id(self):
         return "track.%d" % self.itemID
@@ -850,7 +851,7 @@ class BansheeStore(BackendStore, BansheeDB):
 
     def get_by_id(self, item_id):
         self.info("get_by_id %s", item_id)
-        if isinstance(item_id, basestring) and item_id.find('.') > 0:
+        if isinstance(item_id, str) and item_id.find('.') > 0:
             item_id = item_id.split('@', 1)
             item_type, item_id = item_id[0].split('.')[:2]
             item_id = int(item_id)
