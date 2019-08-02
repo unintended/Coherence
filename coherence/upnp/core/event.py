@@ -126,7 +126,7 @@ class EventSubscriptionServer(resource.Resource, log.Loggable):
                 elif not headers.has_key('callback'):
                     request.setResponseCode(404)
                     request.setHeader('SERVER', SERVER_ID)
-                    request.setHeader('CONTENT-LENGTH', 0)
+                    request.setHeader('CONTENT-LENGTH', b'0')
                     return ""
             except:
                 from .uuid import UUID
@@ -142,7 +142,7 @@ class EventSubscriptionServer(resource.Resource, log.Loggable):
             #request.setHeader('Subscription-ID', sid)  wrong example in the UPnP UUID spec?
             request.setHeader('TIMEOUT', s['timeout'])
             request.setHeader('SERVER', SERVER_ID)
-            request.setHeader('CONTENT-LENGTH', 0)
+            request.setHeader('CONTENT-LENGTH', b'0')
         return ""
 
     def render_UNSUBSCRIBE(self, request):
