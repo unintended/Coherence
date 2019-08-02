@@ -43,7 +43,7 @@ class EventServer(resource.Resource, log.Loggable):
         request.setResponseCode(200)
 
         command = {'method': request.method, 'path': request.path}
-        headers = request.received_headers
+        headers = request.getAllHeaders()
         louie.send('UPnP.Event.Server.message_received', None, command, headers, data)
 
         if request.code != 200:
@@ -111,7 +111,7 @@ class EventSubscriptionServer(resource.Resource, log.Loggable):
         request.setResponseCode(200)
 
         command = {'method': request.method, 'path': request.path}
-        headers = request.received_headers
+        headers = request.getAllHeaders()
         louie.send('UPnP.Event.Client.message_received', None, command, headers, data)
 
         if request.code != 200:
