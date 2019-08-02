@@ -442,7 +442,7 @@ def getPage(url, contextFactory=None, *args, **kwargs):
     elif not 'agent' in kwargs:
         kwargs['agent'] = "Coherence PageGetter"
     return client._makeGetterFactory(
-        url,
+        url.encode('utf-8'),
         HeaderAwareHTTPClientFactory,
         contextFactory=contextFactory,
         *args, **kwargs).deferred
@@ -589,7 +589,7 @@ class BufferFile(static.File):
             # won't be overwritten.
             request.method = 'HEAD'
             return ''
-        #print "StaticFile out", request.headers, request.code
+        #print "StaticFile out", request.getAllHeaders(), request.code
 
         # return data
         # size is the byte position to stop sending, not how many bytes to send

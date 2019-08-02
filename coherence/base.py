@@ -144,7 +144,7 @@ class Plugins(log.Loggable):
     plugin = self._plugins.__getitem__(key)
     if pkg_resources and isinstance(plugin, pkg_resources.EntryPoint):
       try:
-        plugin = plugin.load(require=False)
+        plugin = plugin.resolve()
       except (ImportError, AttributeError, pkg_resources.ResolutionError), msg:
         self.warning("Can't load plugin %s (%s), maybe missing dependencies...", plugin.name, msg)
         self.info(traceback.format_exc())

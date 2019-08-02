@@ -43,7 +43,7 @@ class EventServer(resource.Resource, log.Loggable):
         request.setResponseCode(200)
 
         command = {'method': request.method, 'path': request.path}
-        headers = request.received_headers
+        headers = request.getAllHeaders()
         louie.send('UPnP.Event.Server.message_received', None, command, headers, data)
 
         if request.code != 200:
@@ -111,7 +111,7 @@ class EventSubscriptionServer(resource.Resource, log.Loggable):
         request.setResponseCode(200)
 
         command = {'method': request.method, 'path': request.path}
-        headers = request.received_headers
+        headers = request.getAllHeaders()
         louie.send('UPnP.Event.Client.message_received', None, command, headers, data)
 
         if request.code != 200:
@@ -126,7 +126,7 @@ class EventSubscriptionServer(resource.Resource, log.Loggable):
                 elif not headers.has_key('callback'):
                     request.setResponseCode(404)
                     request.setHeader('SERVER', SERVER_ID)
-                    request.setHeader('CONTENT-LENGTH', 0)
+                    request.setHeader('CONTENT-LENGTH', b'0')
                     return ""
             except:
                 from .uuid import UUID
@@ -142,7 +142,7 @@ class EventSubscriptionServer(resource.Resource, log.Loggable):
             #request.setHeader('Subscription-ID', sid)  wrong example in the UPnP UUID spec?
             request.setHeader('TIMEOUT', s['timeout'])
             request.setHeader('SERVER', SERVER_ID)
-            request.setHeader('CONTENT-LENGTH', 0)
+            request.setHeader('CONTENT-LENGTH', b'0')
         return ""
 
     def render_UNSUBSCRIBE(self, request):
