@@ -12,7 +12,7 @@ DOCPAGES = (
 
 deps = [
   'ConfigObj >= 4.3',
-  'Twisted >= 14.0,<19.7',
+  'Twisted >= 14.0',
   'zope.interface',
   'louie < 2',
   'livestreamer',
