@@ -14,7 +14,7 @@ deps = [
   'ConfigObj >= 4.3',
   'Twisted >= 14.0',
   'zope.interface',
-  'louie',
+  'louie < 2',
   'livestreamer',
   'lxml',
   'python-dateutil',
