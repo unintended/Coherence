@@ -646,7 +646,7 @@ class FSStore(BackendStore):
             container = containers.pop()
             try:
                 self.debug('adding %r', container.location)
-                for child in container.location.children():
+                for child in sorted(container.location.children()):
                     if ignore_file_pattern.match(child.basename()) != None:
                         continue
                     new_container = self.append(child.path, container)
