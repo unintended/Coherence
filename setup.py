@@ -20,7 +20,7 @@ deps = [
   'python-dateutil',
   'pyopenssl'
 ]
-if sys.platform in ('win32', 'sunos5'):
+if sys.platform in ('win32', 'sunos5', 'darwin'):
   deps.append('Netifaces >= 0.4')
 
 entry_points = """

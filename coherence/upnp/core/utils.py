@@ -123,11 +123,21 @@ def get_host_address():
     """
 
     import sys
-    if sys.platform == 'win32':
+    if sys.platform in ['win32', 'darwin']:
         if have_netifaces:
             interfaces = netifaces.interfaces()
             if len(interfaces):
-                return get_ip_address(interfaces[0])    # on windows assume first interface is primary
+                localhost_ip = None
+                for interface in interfaces:
+                    try:
+                        ip = get_ip_address(interface)
+                        if ip.startswith('127.0.'):
+                            localhost_ip = ip
+                            continue
+                        return ip
+                    except: # Some don't have an IP
+                        continue
+                return localhost_ip # if we can't find a non-localhost, return it anyways
     else:
         try:
             route_file = '/proc/net/route'
